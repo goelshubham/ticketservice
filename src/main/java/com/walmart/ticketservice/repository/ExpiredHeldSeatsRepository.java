@@ -6,6 +6,6 @@ import com.walmart.ticketservice.entity.SeatHold;
 
 public interface ExpiredHeldSeatsRepository {
 	
-	public List<SeatHold> findAllExpiredHeldSeats(int holdTime);
+	public List<SeatHold> findAllExpiredHeldSeats(int holdTime, String venueID);
 
 }

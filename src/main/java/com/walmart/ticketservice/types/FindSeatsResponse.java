@@ -6,14 +6,14 @@ package com.walmart.ticketservice.types;
  */
 public class FindSeatsResponse {
 	
-	Integer numberOfSeats;
+	Integer numberOfAvailableSeats;
 
 	public Integer getNumberOfSeats() {
-		return numberOfSeats;
+		return numberOfAvailableSeats;
 	}
 
 	public void setNumberOfSeats(Integer numberOfSeats) {
-		this.numberOfSeats = numberOfSeats;
+		this.numberOfAvailableSeats = numberOfSeats;
 	}
 	
 	

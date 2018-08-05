@@ -13,9 +13,8 @@ public class Venue {
 	@Id
 	private String venueId;
 	private int numberOfLevels;
-	private int numberOfSeats;
-	private Map<Integer, Integer> availableSeats;
-	private int holdLimit;
+	private int totalNumberOfSeats;
+	private Map<Integer, Integer> availableSeatsAtLevel;
 	private Map<Integer, List<Seat>> seatMap;
 	private LocalDateTime time;
 	
@@ -32,16 +31,10 @@ public class Venue {
 		this.numberOfLevels = numberOfLevels;
 	}
 	public int getNumberOfSeats() {
-		return numberOfSeats;
+		return totalNumberOfSeats;
 	}
 	public void setNumberOfSeats(int numberOfSeats) {
-		this.numberOfSeats = numberOfSeats;
-	}
-	public int getHoldLimit() {
-		return holdLimit;
-	}
-	public void setHoldLimit(int holdLimit) {
-		this.holdLimit = holdLimit;
+		this.totalNumberOfSeats = numberOfSeats;
 	}
 	public Map<Integer, List<Seat>> getSeatMap() {
 		return seatMap;
@@ -56,10 +49,10 @@ public class Venue {
 		this.time = time;
 	}
 	public Map<Integer, Integer> getAvailableSeats() {
-		return availableSeats;
+		return availableSeatsAtLevel;
 	}
 	public void setAvailableSeats(Map<Integer, Integer> availableSeats) {
-		this.availableSeats = availableSeats;
+		this.availableSeatsAtLevel = availableSeats;
 	}
 
 }

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -32,8 +34,6 @@ import com.walmart.ticketservice.validator.RequestValidator;
 @Component
 public class TicketServiceImpl implements TicketService {
 
-	
-	
 	@Autowired
 	private RequestValidator requestValidator;
 	
@@ -42,9 +42,6 @@ public class TicketServiceImpl implements TicketService {
 	
 	@Autowired
 	private BookingRepository bookingRepository;
-	
-	@Autowired
-	private Environment env;
 	
 	@Autowired
 	private TicketServiceUtil ticketServiceUtil;
@@ -59,16 +56,16 @@ public class TicketServiceImpl implements TicketService {
 			e.printStackTrace();
 		}
 
-		List<Seat> releasedSeats = this.releaseExpiredHoldSeats(venueId, venueLevel);
-
 		Optional<Venue> venue = venueRepository.findById(venueId);
-		Venue ven = null;
-		if (venue.isPresent()) {
-			ven = venue.get();
-
-			return this.getAvailableSeats(releasedSeats, ven);
+		if(!venue.isPresent())
+		{
+			throw new InvalidRequest("Requested Venue Not Found!");
 		}
-		return 0;
+		
+		List<Seat> releasedSeats = this.releaseExpiredHoldSeats(venueId);
+
+		Venue ven = venue.get();
+		return this.getAvailableSeats(releasedSeats, ven, venueLevel);
 	}
 
 	@Override
@@ -81,11 +78,12 @@ public class TicketServiceImpl implements TicketService {
 		}
 
 		Venue ven = venue.get();
+		int seatHoldLimit = this.ticketServiceUtil.getSeatHoldLimitForVenue(venueId);
 		
 		//check if venue allows these many seats to be held by a customer
-		if(numSeats > ven.getHoldLimit() )
+		if(numSeats > seatHoldLimit )
 		{
-			throw new InvalidRequest("Requested number of seats for hold is more than allowed limit of " + ven.getHoldLimit());
+			throw new InvalidRequest("Requested number of seats for hold is more than allowed limit of " + seatHoldLimit);
 		}
 		
 		if (numSeats >= this.ticketServiceUtil.getAvailableSeats(ven)) {
@@ -97,18 +95,16 @@ public class TicketServiceImpl implements TicketService {
 		bestAvailableSeats.addAll(this.findBestAvailableSeats(ven, numSeats, customerEmail));
 
 		// Hold seats
-		String seatHoldId = UUID.randomUUID().toString();
-		/*SeatHold seatHold = new SeatHold(seatHoldId, customerEmail, bestAvailableSeats, bestAvailableSeats.get(0).getLevel(),
-				venueId, bestAvailableSeats.size());
-		*/
+		//String seatHoldId = UUID.randomUUID().toString();
+		String seatHoldId = RandomStringUtils.randomAlphanumeric(12).toUpperCase();
 		SeatHold newSeatHold = new SeatHold();
 		newSeatHold.setBookingId(seatHoldId);
 		newSeatHold.setCustomerEmail(customerEmail);
-		newSeatHold.setLevel(bestAvailableSeats.get(0).getLevel());
 		newSeatHold.setSeatList(bestAvailableSeats);
 		newSeatHold.setStatus(Status.HELD);
 		newSeatHold.setTotalSeats(bestAvailableSeats.size());
 		newSeatHold.setVenueId(venueId);
+		newSeatHold.setBookingTime(System.currentTimeMillis());
 		
 		//insert new seathold object into database
 		this.bookingRepository.insert(newSeatHold);
@@ -126,10 +122,12 @@ public class TicketServiceImpl implements TicketService {
 		this.requestValidator.reserverSeatsValidator(seatHoldId, customerEmail);
 
 		Optional<SeatHold> seatHold = this.bookingRepository.findById(seatHoldId);
+		
 		// check if SeatHold id exists
 		if (!seatHold.isPresent()) {
-			throw new InvalidRequest("Invalid Hold confirmation code");
+			throw new InvalidRequest("Invalid Seat Hold confirmation code");
 		}
+		
 		SeatHold seatHoldObj = seatHold.get();
 
 		// check if this booking is already reserved
@@ -149,31 +147,35 @@ public class TicketServiceImpl implements TicketService {
 		if (!seatHoldObj.getCustomerEmail().equalsIgnoreCase(customerEmail)) {
 			throw new InvalidRequest("Invalid EmailId: Provided email Id do not match with");
 		}
-
+		
 		// change seat hold to reserved and persist in database
 		seatHoldObj.setBookingTime(System.currentTimeMillis());
 		seatHoldObj.setStatus(Status.RESERVED);
 		
+	
 		//Seat hold will become reserved booking
-		this.bookingRepository.insert(seatHoldObj);
+		this.bookingRepository.save(seatHoldObj);
 
 		return seatHoldObj.getBookingId();
 	}
 	
 	/*
 	 * This method does following
-	 * 1. updates the Venue object with hold seats whixh had expired
+	 * 1. updates the Venue object with hold seats which had expired
 	 * 2. returns the total number of available seats in the Venue
 	 * 3. Updates the venue object in database
 	 */
-	private int getAvailableSeats(List<Seat> releasedSeats, Venue venue) {
+	private int getAvailableSeats(List<Seat> releasedSeats, Venue venue, String level) {
 
 		HashMap<Integer, Integer> levelSeatMap = new HashMap<Integer, Integer>();
-		levelSeatMap.putAll(venue.getAvailableSeats());
+		
+		if(venue.getAvailableSeats() != null) {
+			levelSeatMap.putAll(venue.getAvailableSeats());
+		}
 
 		for (Seat seat : releasedSeats) {
-			int oldNumSeat = levelSeatMap.get(seat.getLevel());
-			levelSeatMap.put(seat.getLevel(), ++oldNumSeat);
+			int oldNumSeat = levelSeatMap.get(seat.getLevelId());
+			levelSeatMap.put(seat.getLevelId(), oldNumSeat + 1);
 		}
 
 		Collection<Integer> col = levelSeatMap.values();
@@ -182,24 +184,39 @@ public class TicketServiceImpl implements TicketService {
 			totalAvailableSeats += integer;
 		}
 
+		// update Venue object with released seats
 		venue.setAvailableSeats(levelSeatMap);
 		venueRepository.save(venue);
-		return totalAvailableSeats;
+
+		// If level number is not present, return all available seats in Venue
+		if (StringUtils.isEmpty(level)) {
+			return totalAvailableSeats;
+		}
+		// If level number is present, return available seats at that level
+		else {
+			return levelSeatMap.get(Integer.valueOf(level));
+		}
 	}
 
 	/*
 	 * @description: This method will check if there are seats which were held by customers but hold time limit has expired.
 	 * Get hold time limit value from application properties. This property is configurable externally.
 	 * @param venueId (required)
-	 * @param venueLevel (optional)
 	 */
-	private List<Seat> releaseExpiredHoldSeats(String venueId, String venueLevel) {
+	private List<Seat> releaseExpiredHoldSeats(String venueId) {
 
 		int timeInSeconds = this.ticketServiceUtil.getHoldTimeForVenue(venueId);
-		List<SeatHold> allHeldSeats = bookingRepository.findAllExpiredHeldSeats(timeInSeconds);
+		
+		//get all expired SeatHolds for the requested venue
+		List<SeatHold> allHeldSeats = bookingRepository.findAllExpiredHeldSeats(timeInSeconds, venueId);
 
+		//Delete all seatHold entries in database because they expired
+		this.bookingRepository.deleteAll(allHeldSeats);
+		
 		List<Seat> seatList = new ArrayList<Seat>();
 
+		//shubham:Write logic to update Venue object with released seats.
+		
 		Iterator<SeatHold> iterator = allHeldSeats.iterator();
 		while (iterator.hasNext()) {
 			SeatHold seatHold = iterator.next();
@@ -208,44 +225,69 @@ public class TicketServiceImpl implements TicketService {
 			}
 		}
 		System.out.println(allHeldSeats.size());
-
+		
 		return seatList;
-
 	}
 
-	private List<Seat> findBestAvailableSeats(Venue venue, int numSeats, String customerEmail) {
+	/**
+	 * 
+	 * @param venue
+	 * @param numSeats
+	 * @param customerEmail
+	 * @return List of best available seats
+	 */
+	private List<Seat> findBestAvailableSeats(Venue venue, int seatsRequested, String customerEmail) {
 
 		Map<Integer, Integer> levelSeatMap = new HashMap<Integer, Integer>();
 		levelSeatMap.putAll(venue.getAvailableSeats());
-		int bestAvailableLevel = 0;
-
-		Iterator<Map.Entry<Integer, Integer>> iterator = levelSeatMap.entrySet().iterator();
+		int bestAvailableLevel = 1;
+		int availableSeatsAtLevel = 0;
+		boolean seatsFound = false;
 		for (int index = 0; index < levelSeatMap.size(); index++) {
-			if (levelSeatMap.get(index + 1) > numSeats) {
-				// hold seats at this level
-				bestAvailableLevel = index + 1;
-				levelSeatMap.put(bestAvailableLevel, levelSeatMap.get(bestAvailableLevel) - numSeats);
+			availableSeatsAtLevel = levelSeatMap.get(bestAvailableLevel);
+			if (availableSeatsAtLevel >= seatsRequested) {
+				seatsFound = true;
+				levelSeatMap.put(bestAvailableLevel, (availableSeatsAtLevel - seatsRequested));
 				break;
 			}
 		}
 
+		//If no level has enough number of seats 
+		if(!seatsFound)
+		{
+			throw new BookingException("Requested number of seats is greater than available seats at any level");
+		}
+		
+		//update Venue object with adjusted number of seats
 		venue.setAvailableSeats(levelSeatMap);
+		
 		Map<Integer, List<Seat>> seatMap = new HashMap<Integer, List<Seat>>();
 		seatMap.putAll(venue.getSeatMap());
 		List<Seat> allSeats = seatMap.get(bestAvailableLevel);
 		List<Seat> selectedSeats = new ArrayList<Seat>();
 
+		//Change Seat status from AVAILEBLE to HELD for the number of requested seats only
+		//When seatCounter has become equals to requestSeats then we have changed status
+		int seatCounter = 0;
 		for (Seat seat : allSeats) {
 			if (seat.getStatus().equals(Status.AVAILABLE)) {
 				seat.setStatus(Status.HELD);
 				selectedSeats.add(seat);
+				seatCounter++;
+				
+				if(seatCounter == seatsRequested)
+					break;
 			}
 		}
 
-		// save updated venue
+		/*
+		 * Update the Venue object with updated seat Status
+		 * Persist updated venue object in database 
+		 */
+		seatMap.put(bestAvailableLevel, allSeats);
+		venue.setSeatMap(seatMap);
 		this.venueRepository.save(venue);
 
-		//return new SeatHold(customerEmail, selectedSeats, bestAvailableLevel, venue.getVenueId(), selectedSeats.size());
 		return selectedSeats;
 	}
 }

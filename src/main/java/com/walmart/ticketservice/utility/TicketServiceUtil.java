@@ -13,7 +13,10 @@ import com.walmart.ticketservice.entity.Venue;
 public class TicketServiceUtil {
 
 	private final String HOLD_TIME = "hold.time.limit";
+	private final String HOLD_LIMIT = "hold.seat.limit";
+	
 	private final int DEFAULT_HOLD_TIME = 120;
+	private final int DEFAULT_HOLD_LIMIT = 10;
 	
 	@Autowired
 	private Environment env;
@@ -59,6 +62,24 @@ public class TicketServiceUtil {
 
 		return timeSeconds;
 	}
-	
 
+	/**
+	 * 
+	 * @param venueId
+	 * @return
+	 */
+	public int getSeatHoldLimitForVenue(String venueId) {
+
+		String holdSeatProp = venueId + "." + HOLD_LIMIT;
+		String seatLimit = env.getProperty(holdSeatProp);
+		int seatHoldLimit = 0;
+		try {
+			seatHoldLimit = Integer.parseInt(seatLimit);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return DEFAULT_HOLD_TIME;
+		}
+
+		return seatHoldLimit;
+	}
 }

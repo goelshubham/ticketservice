@@ -14,16 +14,12 @@ public class RequestValidator {
 		if (StringUtils.isEmpty(venueId)) {
 			throw new InvalidRequest("Provide a valid Venue Id to get requested details.");
 		}
-		try {
-			int levelNumber = Integer.parseInt(level);
-		} catch (Exception ex) {
-			throw new InvalidRequest("Requested level number is invalid");
+		if(StringUtils.isNotEmpty(level))
+		{
+			if (Integer.valueOf(level) <= 0) {
+				throw new InvalidRequest("Requested level number is invalid");
+			}
 		}
-
-		if (Integer.valueOf(level) < 0) {
-			throw new InvalidRequest("Requested level number is invalid");
-		}
-
 	}
 	
 	public void findAndHoldSeatsValidator(int numSeats, String venueLevel, String customerEmail)

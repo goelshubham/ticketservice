@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,9 @@ public class MongoConfig {
     private static final String MONGO_DB_NAME = "embeded_db";
     @Bean
     public MongoTemplate mongoTemplate() throws IOException {
+    	
+        System.out.println("****************MongoDB configuration*******************");
+
         EmbeddedMongoFactoryBean mongo = new EmbeddedMongoFactoryBean();
         mongo.setBindIp(MONGO_DB_URL);
         mongo.setPort(MONGO_PORT);
@@ -44,37 +48,17 @@ public class MongoConfig {
         
         MongoTemplate mongoTemplate = new MongoTemplate(mongoClient, MONGO_DB_NAME);
         
-        //MongoOperations obj = mongoClient.getMongoClientOptions();
-        //Venue ven = new Venue();
         Venue venueDocument = this.loadVenueDocument();
-        SeatHold seatHold = new SeatHold(UUID.randomUUID().toString(),  "goyalshub@gmail.com", new ArrayList<Seat>(), 1, venueDocument.getVenueId(), 5, Status.HELD);
-        //ven.setNumberOfSeats(1000);
         Gson gson = new Gson();
-        
-        Document seatDocument = Document.parse(gson.toJson(seatHold));
-        Timestamp time = new Timestamp(System.currentTimeMillis());
-		time.setTime(time.getTime() - TimeUnit.MINUTES.toMillis(300));
-		java.util.Date date = time;
-        seatDocument.append("_id", "12345").append("bookingTime",  new java.util.Date());
-        
         
         Document document = Document.parse(gson.toJson(venueDocument));
         document.append("_id", venueDocument.getVenueId());
         document.append("time", new java.util.Date());
         
-       
         MongoCollection<Document> venueCollection  = mongoTemplate.createCollection("venue");
         venueCollection.createIndex(Indexes.ascending("venueId"));
         venueCollection.insertOne(document);
 
-        MongoCollection<Document> seatholdCollection  = mongoTemplate.createCollection("seathold");
-        seatholdCollection.insertOne(seatDocument);
-        
-        System.out.println("Mongo config");
-        System.out.println(mongoTemplate.getCollection("seathold").find());
-        FindIterable<Document> doc =  mongoTemplate.getCollection("seathold").find();
-        System.out.println(doc.first().toJson());
-        
         return mongoTemplate;
     }
 
@@ -84,22 +68,28 @@ public class MongoConfig {
 	private Venue loadVenueDocument() {
 
 		Venue cityMusicHall = new Venue();
-		cityMusicHall.setVenueId("CityMusicHall");
+		cityMusicHall.setVenueId("CityHall");
 		cityMusicHall.setNumberOfLevels(5);
-		cityMusicHall.setHoldLimit(5);
 		cityMusicHall.setNumberOfSeats(250);
 
 		HashMap<Integer, List<Seat>> venueMap = new HashMap<Integer, List<Seat>>();
+		HashMap<Integer, Integer> levelSeatMap = new HashMap<Integer, Integer>();
 		for (int level = 1; level <= 5; level++) {
 
 			List<Seat> seatList = new ArrayList<Seat>();
 			for (int seatIndex = 1; seatIndex <= 50; seatIndex++) {
-				Seat seat = new Seat(UUID.randomUUID().toString(), "CityMusicHall", level);
+				Seat seat = new Seat(
+						cityMusicHall.getVenueId().toUpperCase() + "-L" + level + "-"
+								+ RandomStringUtils.randomAlphanumeric(4).toUpperCase(),
+						cityMusicHall.getVenueId(), level);
 				seatList.add(seat);
 			}
 			venueMap.put(level, seatList);
+			levelSeatMap.put(level, seatList.size());
+
 		}
 		cityMusicHall.setSeatMap(venueMap);
+		cityMusicHall.setAvailableSeats(levelSeatMap);
 
 		return cityMusicHall;
 	}

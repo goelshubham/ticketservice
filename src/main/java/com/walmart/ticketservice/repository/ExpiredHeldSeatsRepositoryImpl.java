@@ -32,15 +32,19 @@ public class ExpiredHeldSeatsRepositoryImpl implements ExpiredHeldSeatsRepositor
 	java.util.Date date;
 	
 	@Override
-	public List<SeatHold> findAllExpiredHeldSeats(int holdTime) {
+	public List<SeatHold> findAllExpiredHeldSeats(int holdTime, String venueID) {
 		final Query query = new Query();
 		final List<Criteria> criteria = new ArrayList<Criteria>();
-		Timestamp time = new Timestamp(System.currentTimeMillis());
+	/*	Timestamp time = new Timestamp(System.currentTimeMillis());
 		time.setTime(time.getTime() - TimeUnit.MINUTES.toMillis(0));
+	*/	
+		//shubham: correct this
+		Long expiredTimeLimit = System.currentTimeMillis() - (holdTime *1000);
+		//Long expiredTimeLimit = System.currentTimeMillis();
 		
-		
-		criteria.add(Criteria.where("bookingTime").lte(date));
-		criteria.add(Criteria.where("status").is(Status.RESERVED.toString()));
+		criteria.add(Criteria.where("venueId").is(venueID));
+		criteria.add(Criteria.where("bookingTime").lte(expiredTimeLimit));
+		criteria.add(Criteria.where("status").is(Status.HELD.toString()));
 		
 		
 		if(!criteria.isEmpty())

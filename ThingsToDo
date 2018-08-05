@@ -1,11 +1,14 @@
-Things to do
+*******Things to do********
 
-1. Add logging
+1. Add logging **
 2. set spring logging level
-3. Exception handling
-4. Junits
+3. Exception handling **
+4. Junits ****
 5. swagger UI
 6. Synchronization
 7. Transaction Management
-8. Move all repeated validations in UTIL class
+8. Move all repeated validations in UTIL class **
 9. Create Customer object with (Id, emailId, FirstName, LastName, Phone)
+10. request validation ***
+11. Take care of custom booking ID and seat IDs - done!!
+12. Add comments

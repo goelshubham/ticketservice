@@ -15,16 +15,15 @@ public class SeatHold {
     private String customerEmail;
     private Long bookingTime;
     private List<Seat> seatList;
-    private int level;
+    //private int level;
     private String venueId;
     private int totalSeats;
     private Status status;
     
-    public SeatHold(String bookingId, String customerEmail, List<Seat> seatList, int level, String venueId,
-			int totalSeats, Status status) {
+    public SeatHold(String bookingId, String customerEmail, List<Seat> seatList, String venueId, int totalSeats, Status status) {
 		this.customerEmail = customerEmail;
 		this.seatList = seatList;
-		this.level = level;
+		//this.level = level;
 		this.venueId = venueId;
 		this.totalSeats = totalSeats;
 		this.bookingId = bookingId;
@@ -57,12 +56,12 @@ public class SeatHold {
 	public void setTotalSeats(int totalSeats) {
 		this.totalSeats = totalSeats;
 	}
-	public int getLevel() {
+/*	public int getLevel() {
 		return level;
-	}
-	public void setLevel(int level) {
+	}*/
+/*	public void setLevel(int level) {
 		this.level = level;
-	}
+	}*/
 	public String getVenueId() {
 		return venueId;
 	}

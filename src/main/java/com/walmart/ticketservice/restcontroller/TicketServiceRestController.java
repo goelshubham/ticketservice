@@ -16,7 +16,7 @@ import com.walmart.ticketservice.types.FindSeatsResponse;
 import com.walmart.ticketservice.types.HoldSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsRequest;
 
-@RestController
+@RestController("/ticketservice/v1")
 public class TicketServiceRestController {
 	
 	@Autowired
@@ -25,33 +25,43 @@ public class TicketServiceRestController {
 	@RequestMapping(value= "/api/findSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<FindSeatsResponse> numSeatsAvailable(@RequestBody FindSeatsRequest findSeatsRequest)
 	{
-		if(findSeatsRequest != null)
-		{
+		int numOfSeats = 0;
+		if (findSeatsRequest != null) {
 			System.out.println("Venue is -> " + findSeatsRequest.getVenueId());
-			ticketService.numSeatsAvailable(findSeatsRequest.getVenueId(), findSeatsRequest.getLevelNumber());
+			numOfSeats = ticketService.numSeatsAvailable(findSeatsRequest.getVenueId(),
+					findSeatsRequest.getLevelNumber());
 		}
-		else
-		{
-			//request is null
-		}
-		return null;
+
+		FindSeatsResponse findSeatsResponse = new FindSeatsResponse();
+		findSeatsResponse.setNumberOfSeats(numOfSeats);
+		return new ResponseEntity<FindSeatsResponse>(findSeatsResponse, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value= "/api/holdSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<SeatHold> findAndHoldSeats(@RequestBody HoldSeatsRequest holdSeatsRequest)
 	{
-		ticketService.findAndHoldSeats(holdSeatsRequest.getNumberOfSeats(), holdSeatsRequest.getVenueId(), holdSeatsRequest.getCustomerEmailId());
-		return null;
+		SeatHold seatHoldResponse = null;
+		if (holdSeatsRequest != null) {
+			seatHoldResponse = new SeatHold();
+			seatHoldResponse = ticketService.findAndHoldSeats(holdSeatsRequest.getNumberOfSeats(),
+					holdSeatsRequest.getVenueId(), holdSeatsRequest.getCustomerEmailId());
+		}
+		return new ResponseEntity<SeatHold>(seatHoldResponse, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value= "/api/reserveSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<SeatHold> reserveSeats(@RequestBody ReserveSeatsRequest reserveSeatsRequest)
+	public ResponseEntity<String> reserveSeats(@RequestBody ReserveSeatsRequest reserveSeatsRequest)
 	{
 		System.out.println("/api/reserveSeats/" + reserveSeatsRequest.getSeatHoldId() + "/" + reserveSeatsRequest.getCustomerEmail());
 		SeatHold obj = new SeatHold();
 		//obj.setBookingCode("1111111111111");
 		obj.setCustomerEmail(reserveSeatsRequest.getCustomerEmail());
-		return new ResponseEntity<SeatHold>(obj, HttpStatus.ACCEPTED);
+		String bookingCode = null;
+		if(reserveSeatsRequest!=null)
+		{
+			bookingCode = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(), reserveSeatsRequest.getCustomerEmail());
+		}
+		return new ResponseEntity<String>(bookingCode, HttpStatus.OK);
 	}
 	
 	
