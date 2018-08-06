@@ -44,7 +44,7 @@ public class ExpiredHeldSeatsRepositoryImpl implements ExpiredHeldSeatsRepositor
 		
 		criteria.add(Criteria.where("venueId").is(venueID));
 		criteria.add(Criteria.where("bookingTime").lte(expiredTimeLimit));
-		criteria.add(Criteria.where("status").is(Status.HELD.toString()));
+		criteria.add(Criteria.where("status").is(Status.HOLD.toString()));
 		
 		
 		if(!criteria.isEmpty())

@@ -15,8 +15,10 @@ import com.walmart.ticketservice.types.FindSeatsRequest;
 import com.walmart.ticketservice.types.FindSeatsResponse;
 import com.walmart.ticketservice.types.HoldSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsRequest;
+import com.walmart.ticketservice.types.ReserveSeatsResponse;
 
-@RestController("/ticketservice/v1")
+@RestController
+@RequestMapping("/ticketservive")
 public class TicketServiceRestController {
 	
 	@Autowired
@@ -46,22 +48,19 @@ public class TicketServiceRestController {
 			seatHoldResponse = ticketService.findAndHoldSeats(holdSeatsRequest.getNumberOfSeats(),
 					holdSeatsRequest.getVenueId(), holdSeatsRequest.getCustomerEmailId());
 		}
+		
 		return new ResponseEntity<SeatHold>(seatHoldResponse, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value= "/api/reserveSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<String> reserveSeats(@RequestBody ReserveSeatsRequest reserveSeatsRequest)
 	{
-		System.out.println("/api/reserveSeats/" + reserveSeatsRequest.getSeatHoldId() + "/" + reserveSeatsRequest.getCustomerEmail());
-		SeatHold obj = new SeatHold();
-		//obj.setBookingCode("1111111111111");
-		obj.setCustomerEmail(reserveSeatsRequest.getCustomerEmail());
-		String bookingCode = null;
+		SeatHold seatHold = new SeatHold();
 		if(reserveSeatsRequest!=null)
 		{
-			bookingCode = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(), reserveSeatsRequest.getCustomerEmail());
+			seatHold = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(), reserveSeatsRequest.getCustomerEmail());
 		}
-		return new ResponseEntity<String>(bookingCode, HttpStatus.OK);
+		return new ResponseEntity<String>(seatHold.getBookingId(), HttpStatus.OK);
 	}
 	
 	

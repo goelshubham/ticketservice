@@ -33,7 +33,7 @@ public interface TicketService {
     seat hold is assigned
     * @return a reservation confirmation code
     */
-    String reserveSeats(String seatHoldId, String customerEmail);
+    SeatHold reserveSeats(String seatHoldId, String customerEmail);
 
 
 

@@ -8,6 +8,6 @@ package com.walmart.ticketservice.entity;
  */
 public enum Status {
     AVAILABLE,
-    HELD,
+    HOLD,
     RESERVED
 }

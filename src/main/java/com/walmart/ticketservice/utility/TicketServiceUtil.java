@@ -2,12 +2,17 @@ package com.walmart.ticketservice.utility;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.walmart.ticketservice.entity.Venue;
+import com.walmart.ticketservice.exceptions.ErrorConstants;
+import com.walmart.ticketservice.exceptions.InvalidRequest;
+import com.walmart.ticketservice.repository.VenueRepository;
 
 @Component
 public class TicketServiceUtil {
@@ -19,13 +24,16 @@ public class TicketServiceUtil {
 	private final int DEFAULT_HOLD_LIMIT = 10;
 	
 	@Autowired
+	private VenueRepository venueRepository;
+	
+	@Autowired
 	private Environment env;
 	/**
 	 * 
 	 * @param venue
 	 * @return total number of seats available at a venue
 	 */
-	public int getAvailableSeats(Venue venue)
+	public int getAvailableSeats(Venue venue, String level)
 	{
 		HashMap<Integer, Integer> levelSeatMap = new HashMap<Integer, Integer>();
 		levelSeatMap.putAll(venue.getAvailableSeats());
@@ -35,7 +43,11 @@ public class TicketServiceUtil {
 		for (Integer integer : seats) {
 			totalSeats += integer;
 		}
-		return totalSeats;
+		
+		if(StringUtils.isEmpty(level))
+			return totalSeats;
+		else
+			return levelSeatMap.get(Integer.parseInt(level));
 	}
 	
 	/**
@@ -77,9 +89,23 @@ public class TicketServiceUtil {
 			seatHoldLimit = Integer.parseInt(seatLimit);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return DEFAULT_HOLD_TIME;
+			return DEFAULT_HOLD_LIMIT;
 		}
 
 		return seatHoldLimit;
+	}
+	
+	/**
+	 * 
+	 * @param venueId
+	 * @return
+	 */
+	public Venue getVenue(String venueId)
+	{
+		Optional<Venue> venue = venueRepository.findById(venueId);
+		if (!venue.isPresent()) {
+			throw new InvalidRequest("Requested Venue Not Found!", ErrorConstants.VENUE_NOT_FOUND);
+		}
+		return venue.get();
 	}
 }

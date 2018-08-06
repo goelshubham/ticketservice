@@ -6,19 +6,25 @@ public class BookingException extends RuntimeException{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String errorMessage;
 	
-	public BookingException(String message)
-	{
-		super(message);
+	private String message;
+	private String errorCode;
+	public String getMessage() {
+		return message;
 	}
-
-	public String getErrorMessage() {
-		return errorMessage;
+	public void setMessage(String message) {
+		this.message = message;
 	}
-
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public String getErrorCode() {
+		return errorCode;
+	}
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+	public BookingException(String message, String errorCode) {
+		super();
+		this.message = message;
+		this.errorCode = errorCode;
 	}
 	
 

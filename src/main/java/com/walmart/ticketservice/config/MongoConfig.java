@@ -34,7 +34,7 @@ import com.walmart.ticketservice.entity.Venue;
 @Configuration
 public class MongoConfig {
     private static final String MONGO_DB_URL = "localhost";
-    private static final int MONGO_PORT = 23411;
+    private static final int MONGO_PORT = 12345;
     private static final String MONGO_DB_NAME = "embeded_db";
     @Bean
     public MongoTemplate mongoTemplate() throws IOException {
