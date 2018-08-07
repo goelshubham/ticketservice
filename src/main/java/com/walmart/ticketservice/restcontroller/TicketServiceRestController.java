@@ -1,5 +1,7 @@
 package com.walmart.ticketservice.restcontroller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.walmart.ticketservice.entity.SeatHold;
+import com.walmart.ticketservice.repository.BookingRepository;
 import com.walmart.ticketservice.service.TicketService;
 import com.walmart.ticketservice.types.FindSeatsRequest;
 import com.walmart.ticketservice.types.FindSeatsResponse;
@@ -23,6 +26,9 @@ public class TicketServiceRestController {
 	
 	@Autowired
 	private TicketService ticketService;
+	
+	@Autowired
+	private BookingRepository bookingRepo;
 	
 	@RequestMapping(value= "/api/findSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<FindSeatsResponse> numSeatsAvailable(@RequestBody FindSeatsRequest findSeatsRequest)
@@ -53,14 +59,28 @@ public class TicketServiceRestController {
 	}
 	
 	@RequestMapping(value= "/api/reserveSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<String> reserveSeats(@RequestBody ReserveSeatsRequest reserveSeatsRequest)
+	public ResponseEntity<ReserveSeatsResponse> reserveSeats(@RequestBody ReserveSeatsRequest reserveSeatsRequest)
 	{
-		SeatHold seatHold = new SeatHold();
-		if(reserveSeatsRequest!=null)
-		{
-			seatHold = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(), reserveSeatsRequest.getCustomerEmail());
+		String bookingID = null;
+		SeatHold seatHold = null;
+		if (reserveSeatsRequest != null) {
+			bookingID = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(),
+					reserveSeatsRequest.getCustomerEmail());
 		}
-		return new ResponseEntity<String>(seatHold.getBookingId(), HttpStatus.OK);
+
+		Optional<SeatHold> booking = this.bookingRepo.findById(bookingID);
+		if (booking.isPresent())
+			seatHold = booking.get();
+
+		ReserveSeatsResponse reserveSeatsResponse = new ReserveSeatsResponse();
+		reserveSeatsResponse.setBookingCode(bookingID);
+		reserveSeatsResponse.setCustomerEmail(seatHold.getCustomerEmail());
+		reserveSeatsResponse.setNumberOfSeats(seatHold.getTotalSeats());
+		reserveSeatsResponse.setSeatList(seatHold.getSeatList());
+		reserveSeatsResponse.setStatus("RESERVED");
+		reserveSeatsResponse.setVenueId(seatHold.getVenueId());
+
+		return new ResponseEntity<ReserveSeatsResponse>(reserveSeatsResponse, HttpStatus.OK);
 	}
 	
 	
