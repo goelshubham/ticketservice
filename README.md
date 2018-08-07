@@ -13,5 +13,9 @@
 3. Execute below command to start the application
 
 		java -jar ticket-booking-service-0.0.1-SNAPSHOT.jar
+		
+4. You should see message like below when application starts successfully
+		
+![App Startup](https://github.com/goelshubham/ticketservice/blob/master/app-start.PNG)
 
     
