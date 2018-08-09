@@ -1,5 +1,7 @@
 # Ticket Service
 
+Technology Stack: Java 8, Spring, Spring Boot, Spring Data, Embeded MongoDB, REST, Junit, Mockito, Eclipse IDE
+
 ## Steps to build and execute via command line
 
 1. Open git bash and execute below command to clone git repository
