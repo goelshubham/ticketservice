@@ -11,7 +11,6 @@ public class ReserveSeatsResponse {
 	String status;
 	int numberOfSeats;
 	String VenueId;
-	List<Seat> seatList;
 	public String getBookingCode() {
 		return bookingCode;
 	}
@@ -42,11 +41,4 @@ public class ReserveSeatsResponse {
 	public void setVenueId(String venueId) {
 		VenueId = venueId;
 	}
-	public List<Seat> getSeatList() {
-		return seatList;
-	}
-	public void setSeatList(List<Seat> seatList) {
-		this.seatList = seatList;
-	}
-	
 }

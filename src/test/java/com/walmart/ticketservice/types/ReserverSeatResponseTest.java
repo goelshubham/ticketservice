@@ -78,17 +78,4 @@ public class ReserverSeatResponseTest {
 		reserveSeatsResponse.setVenueId("CityHall");
 		assertEquals(reserveSeatsResponse.getVenueId(), "CityHall");
 	}
-
-	@Test
-	public void testGetSeatList() {
-		reserveSeatsResponse.setSeatList(null);
-		assertNull(reserveSeatsResponse.getSeatList());
-	}
-
-	@Test
-	public void testSetSeatList() {
-		reserveSeatsResponse.setSeatList(null);
-		assertNull(reserveSeatsResponse.getSeatList());
-	}
-
 }

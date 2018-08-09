@@ -155,6 +155,8 @@ public class TicketServiceImpl implements TicketService {
 
 		// Seat hold will become reserved booking
 		this.bookingRepository.save(seatHoldObj);
+		
+		this.ticketServiceHandler.updateVenueWithSeatStatus(seatHoldObj.getVenueId(), seatHoldObj);
 
 		return seatHoldObj.getBookingId();
 	}

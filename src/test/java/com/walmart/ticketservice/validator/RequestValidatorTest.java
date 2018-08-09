@@ -35,14 +35,4 @@ public class RequestValidatorTest {
 		
 	}
 
-	@Test
-	public void testFindAndHoldSeatsValidator() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testReserverSeatsValidator() {
-		fail("Not yet implemented");
-	}
-
 }

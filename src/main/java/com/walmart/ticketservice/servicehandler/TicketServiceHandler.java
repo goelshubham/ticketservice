@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,8 @@ import com.walmart.ticketservice.exceptions.ErrorConstants;
 import com.walmart.ticketservice.repository.BookingRepository;
 import com.walmart.ticketservice.repository.VenueRepository;
 import com.walmart.ticketservice.utility.TicketServiceUtil;
+
+import de.flapdoodle.embed.process.collections.Collections;
 
 @Component
 public class TicketServiceHandler {
@@ -194,6 +197,107 @@ public class TicketServiceHandler {
 		this.venueRepository.save(venue);
 
 		return selectedSeats;
+	}
+	
+/*	public void updateVenueWithSeatStatus(String venueID, SeatHold seatHold)
+	{
+		Optional<Venue> ven = this.venueRepository.findById(venueID);
+		Venue venue = null;
+		
+		if (ven.isPresent()) {
+			venue = ven.get();
+		} else {
+			return;
+		}
+		
+		HashMap<Integer, List<Seat>> levelSeatMap = new HashMap<Integer, List<Seat>>();
+		levelSeatMap.putAll(venue.getSeatMap());
+		int level = 0;
+
+		List<Seat> holdSeats = new ArrayList<Seat>();
+
+		if (seatHold != null && seatHold.getSeatList() != null && seatHold.getSeatList().size() > 0) {
+			level = seatHold.getSeatList().get(0).getLevelId();
+			holdSeats.addAll(seatHold.getSeatList());
+		}
+
+		List<Seat> seatList = new ArrayList<Seat>();
+		seatList.addAll(levelSeatMap.get(level));
+
+		HashMap<String, Seat> seatMap = new HashMap<String, Seat>();
+
+		for (Seat seat : seatList) {
+			seatMap.put(seat.getSeatId(), seat);
+		}
+
+		for (Seat seat : holdSeats) {
+			if (seatMap.containsKey(seat.getSeatId())) {
+				seatMap.get(seat.getSeatId()).setStatus(Status.RESERVED);
+			}
+		}
+
+		seatList.clear();
+
+		Collection<Seat> col = seatMap.values();
+
+		for (Seat seat : col) {
+			seatList.add(seat);
+		}
+		levelSeatMap.put(level, seatList);
+
+		venue.setSeatMap(levelSeatMap);
+
+		this.venueRepository.save(venue);
+	}*/
+
+	public void updateVenueWithSeatStatus(String venueId, SeatHold seatHold) {
+		Optional<Venue> ven = this.venueRepository.findById(venueId);
+		Venue venue = null;
+		
+		if (ven.isPresent()) {
+			venue = ven.get();
+		} else {
+			return;
+		}
+		
+		HashMap<Integer, List<Seat>> levelSeatMap = new HashMap<Integer, List<Seat>>();
+		levelSeatMap.putAll(venue.getSeatMap());
+		int level = 0;
+
+		List<Seat> holdSeats = new ArrayList<Seat>();
+
+		if (seatHold != null && seatHold.getSeatList() != null && seatHold.getSeatList().size() > 0) {
+			level = seatHold.getSeatList().get(0).getLevelId();
+			holdSeats.addAll(seatHold.getSeatList());
+		}
+
+		List<Seat> seatList = new ArrayList<Seat>();
+		seatList.addAll(levelSeatMap.get(level));
+
+		HashMap<String, Seat> seatMap = new HashMap<String, Seat>();
+
+		for (Seat seat : seatList) {
+			seatMap.put(seat.getSeatId(), seat);
+		}
+
+		for (Seat seat : holdSeats) {
+			if (seatMap.containsKey(seat.getSeatId())) {
+				seatMap.get(seat.getSeatId()).setStatus(Status.RESERVED);
+			}
+		}
+
+		seatList.clear();
+
+		Collection<Seat> col = seatMap.values();
+
+		for (Seat seat : col) {
+			seatList.add(seat);
+		}
+		levelSeatMap.put(level, seatList);
+
+		venue.setSeatMap(levelSeatMap);
+
+		this.venueRepository.save(venue);
 	}
 
 

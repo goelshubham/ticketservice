@@ -47,6 +47,9 @@ public class TicketServiceRestControllerTest {
 	@Mock
 	private BookingRepository bookingRepo;
 	
+	@Mock
+	private ReserveSeatsResponse reserverSeatResponse;
+	
 	@Before
 	public void contextLoads() {
 	}
@@ -74,26 +77,6 @@ public class TicketServiceRestControllerTest {
 		assertEquals(HttpStatus.OK, r.getStatusCode());
 	}
 	
-	@Test
-	public void reserveSeats()
-	{
-		ReserveSeatsRequest reserveSeatsRequest = new ReserveSeatsRequest();
-		reserveSeatsRequest.setCustomerEmail("test@gmail.com");
-		reserveSeatsRequest.setSeatHoldId("ABCDEFGH");
-		SeatHold seatHold = new SeatHold();
-		seatHold.setBookingId("ABCDEGGH");
-		seatHold.setCustomerEmail("shubham@gmail.com");
-		seatHold.setStatus(Status.RESERVED);
-		Optional<SeatHold> testHold = Optional.of(seatHold);
-		when(bookingRepo.findById(reserveSeatsRequest.getSeatHoldId())).thenReturn(testHold);
-		Mockito.mock(SeatHold.class);
-		Mockito.mock(ReserveSeatsResponse.class);
-		
-		
-		ResponseEntity<ReserveSeatsResponse>  r = ticketServiceRestController.reserveSeats(reserveSeatsRequest);
-		assertEquals(HttpStatus.OK, r.getStatusCode());
-		
-	}
 	
 	
 	

@@ -76,7 +76,6 @@ public class TicketServiceRestController {
 		reserveSeatsResponse.setBookingCode(bookingID);
 		reserveSeatsResponse.setCustomerEmail(seatHold.getCustomerEmail());
 		reserveSeatsResponse.setNumberOfSeats(seatHold.getTotalSeats());
-		reserveSeatsResponse.setSeatList(seatHold.getSeatList());
 		reserveSeatsResponse.setStatus("RESERVED");
 		reserveSeatsResponse.setVenueId(seatHold.getVenueId());
 
