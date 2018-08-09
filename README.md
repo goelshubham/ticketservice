@@ -72,6 +72,191 @@ This POST API will find and hold the best available seats for a customer. It ret
 
 <b>Request Format</b>
 
+	{
+		"venueId": "string",
+		"customerEmailId": "string",
+		"numberOfSeats" : Integer
+	}
+    
+
+<b>Sample Request</b>
+
+	curl -H "Content-Type: application/json" -d '{"venueId":"CityHall", "customerEmailId": "goyalshub@gmail.com", "numberOfSeats" : 2}' -X POST http://localhost:8080/ticketservive/api/findAndHoldSeats | json_pp
+    
+
+<b>Sample Response</b>
+
+	{
+    "bookingId": "ZXYTRMWT322C",
+    "customerEmail": "goyalshub@gmail.com",
+    "bookingTime": 1533795541261,
+    "seatList": [
+        {
+            "seatId": "CITYHALL-L1-OCJZ",
+            "venueId": "CityHall",
+            "levelId": 1,
+            "status": "HOLD"
+        },
+        {
+            "seatId": "CITYHALL-L1-MAUC",
+            "venueId": "CityHall",
+            "levelId": 1,
+            "status": "HOLD"
+        }
+    ],
+    "venueId": "CityHall",
+    "totalSeats": 2,
+    "status": "HOLD"
+}
 
 
+### reserveSeats API
+This API Commit seats held for a specific customer. 
+
+<b>Endpoint</b>
+
+	http://localhost:8080/ticketservive/api/reserveSeats
+    
+<b>Request Format</b>
+
+	{
+		"seatHoldId": "string",
+		"customerEmail" : "string"
+	}
+    
+    
+<b>Sample Request</b>
+		
+      curl -H "Content-Type: application/json" -d '{"seatHoldId": "BKFJRPLWLU46", "customerEmailId": "goyalshub@gmail.com"}' -X POST http://localhost:8080/ticketservive/api/reserveSeats | json_pp 
+
+
+<b>Sample Response</b>
+
+	{
+    	"bookingCode": "BKFJRPLWLU46",
+    	"customerEmail": "goyalshub@gmail.com",
+    	"status": "RESERVED",
+    	"numberOfSeats": 2,
+    	"venueId": "CityHall"
+	}
+
+
+## Design And Implementation
+
+For the purpose of performance and scalability, I have used NoSQL database to persist data. For the sake of simplicity of this project, I have used an embedded MongoDB version.
+
+Ticket Service has three main entities:
+1. Venue
+2. SeatHold
+3. Seat
+
+A mongoDB collection is created for Venue which will have details such as unique venueID,
+total number of seats, total number of levels, embeded list of Seats at all level.
+
+Venue collection design in Mongo DB is as below:
+
+	{
+    	"venueId": "String",
+        "numberOfLevels": "Integer",
+        "totalNumberOfSeats": "Integer",
+        "availableSeatsAtLevel" : 
+        {
+        	[
+        		{"levelNumber": "Number of Seats"},
+            	{"levelNumber": "Number of Seats"},
+            	.
+            	.
+            	.
+            ]
+        },
+        "seatMap":
+        {
+        	[
+            	{"levelNumber" : 
+            				{
+            					[
+                                	{
+                                    	"_id": "ObjectId",
+            							"seatId": "String",
+                                        "venueId": "String",
+                                        "levelId" : "Integer"
+                                	},
+                                    {
+                                    	"_id": "ObjectId",
+            							"seatId": "String",
+                                        "venueId": "String",
+                                        "levelId" : "Integer"
+                                    },
+                                    .
+                                    .
+                                    .
+                     			]
+                     		}
+                  }
+                  {"levelNumber" :
+                  
+                  }
+                  .
+                  .
+             ]
+         }
+            
+
+SeatHold collection design in MongoDB is as below:
+
+	{
+    	"bookingId": "String",
+        "customerEmail": "String",
+        "bookingTime" : "Integer",
+        "seatList": {
+                      [
+                           {
+                              "_id": "ObjectId",
+                              "seatId": "String",
+                              "venueId": "String",
+                              "levelId" : "Integer"
+                           },
+                           {
+                              "_id": "ObjectId",
+                              "seatId": "String",
+                              "venueId": "String",
+                              "levelId" : "Integer"
+                           },
+                           .
+                           .
+                       ]
+                     },
+          "venueId": "String",
+          "totalSeats": "Integer",
+          "status": "String"
+     }
+    
+    
+ ![DB-image](https://github.com/goelshubham/ticketservice/blob/master/img/db-image.png)
+ 
+ 
+#### Service Flow Diagram
+
+![serviceflow](https://github.com/goelshubham/ticketservice/blob/master/img/Flow%20Diagram.png)
+
+
+### Assumptions
+1. Best available seats will be determined by first come first basis. All seats at level 1 are equally considered best. Seats at level 2 will be considered next best available. Seats at level 3 will be considered next best available and so on.
+2. Sample data loaded into MongoDB at application startup has only one venue with venueID as 'CityHall' with 5 levels and total number of seats at each level is 50.
+3. Seat Hold time limit and Number of Seat Hold are configured in property file which can be configured in an external property file. These properties can be modified externally and depending on user traffic and other real time scenarios, without having to restart the application. Current time limit is 120 seconds and 10 seat hold limit.
+4. For numSeatsAvailable, user can pass either venueID alone or bothe venueID and levelNumber. If only VenueId is passed then total number of available seats at venueID is returned. When bothe venueID and levelNumber is passed then only seats available at that level are returned.
+5. For findAndHoldSeats, user will be allocated best available seats starting from first level till last level. If enough seats are not available at a level then all seats are booked at next best level. All seats are booked together at any one level.
+6. For reserveSeats, if user corfirms the booking, booking and seat status is changed from HOLD to RESERVED and seatHold ID becomes the Booking Code.
+7. I am assuming that Ticket Service will be consumed by another application. Ticket service is returning error code such as TICKET-SERVICE-1000 in case of exceptions which will be used by calling system to display user friendly message on UI.
+8. Ticket prices and billing is not taken into consideration.
+9. SeatHold structure has SeatHold ID, Status, List of Seats, Total Number of Seats, Venue ID, Booking Time, and Customer Email. 
+
+
+## Scope of Improvements
+
+1. We can implement synchronization and transaction management to avoid deadlocks and have consistent system state.
+2. Best Seat Availability logic can be improved considering rows and columns in the Venue. 
+3. More extensive JUnit testing. 
+
+        
     
