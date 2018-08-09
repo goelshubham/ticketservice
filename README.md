@@ -25,7 +25,7 @@ You should see message like below when application starts successfully.
 	2018-08-07 19:28:59.112  INFO 30232 --- [           main] c.w.t.TicketserviceApplication           : Started TicketserviceApplication in 10.515 seconds (JVM running for 10.934)
 
 
-Note: Please note that the application is using embedded MongoDB which sometimes doesn't shutdown gracefully when the application is stopped so there might be a situation when you try to stop and then start the app and mongoDB might through error that port is still running. If that happens, try starting the app again.
+Note: Please note that the application is using embedded MongoDB which sometimes doesn't shutdown gracefully when the application is stopped so there might be a situation when you try to stop and then start the app and mongoDB might through error that port is still running. MongoDB is configured to run on port - 12347. If applications fails to start due to MongoDB error, try starting the app again or closing the port manually using TASKKILL command. 
 
 ## Running APIs via Command Line
 
