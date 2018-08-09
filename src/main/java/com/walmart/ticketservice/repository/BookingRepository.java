@@ -14,9 +14,4 @@ public interface BookingRepository extends MongoRepository<SeatHold, String>, Ex
 	public Optional<SeatHold> findById(String bookingId);
 
 	public List<SeatHold> findAllExpiredHeldSeats(int holdTime, String venueID);
-	
-	
-	
-	
-
 }

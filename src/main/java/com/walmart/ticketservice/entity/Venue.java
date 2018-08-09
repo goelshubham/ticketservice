@@ -16,7 +16,6 @@ public class Venue {
 	private int totalNumberOfSeats;
 	private Map<Integer, Integer> availableSeatsAtLevel;
 	private Map<Integer, List<Seat>> seatMap;
-	private LocalDateTime time;
 	
 	public String getVenueId() {
 		return venueId;
@@ -41,12 +40,6 @@ public class Venue {
 	}
 	public void setSeatMap(Map<Integer, List<Seat>> seatMap) {
 		this.seatMap = seatMap;
-	}
-	public LocalDateTime getTime() {
-		return time;
-	}
-	public void setTime(LocalDateTime time) {
-		this.time = time;
 	}
 	public Map<Integer, Integer> getAvailableSeats() {
 		return availableSeatsAtLevel;

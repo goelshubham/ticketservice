@@ -10,6 +10,4 @@ public class ErrorConstants {
 	public static final String REQUIRED_FIELD = "TICKET-SERVICE-1005";
 	public static final String INVALID_SEAT_NUMBER = "TICKET-SERVICE-1006";
 	public static final String BOOKING_ERROR ="TICKET-SERVICE-1007";
-	
-
 }

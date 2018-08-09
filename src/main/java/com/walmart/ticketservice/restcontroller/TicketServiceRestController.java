@@ -30,7 +30,7 @@ public class TicketServiceRestController {
 	@Autowired
 	private BookingRepository bookingRepo;
 	
-	@RequestMapping(value= "/api/findSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value= "/api/numSeatsAvailable", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<FindSeatsResponse> numSeatsAvailable(@RequestBody FindSeatsRequest findSeatsRequest)
 	{
 		int numOfSeats = 0;
@@ -45,7 +45,7 @@ public class TicketServiceRestController {
 		return new ResponseEntity<FindSeatsResponse>(findSeatsResponse, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value= "/api/holdSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value= "/api/findAndHoldSeats", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<SeatHold> findAndHoldSeats(@RequestBody HoldSeatsRequest holdSeatsRequest)
 	{
 		SeatHold seatHoldResponse = null;

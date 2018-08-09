@@ -31,10 +31,17 @@ import com.walmart.ticketservice.entity.SeatHold;
 import com.walmart.ticketservice.entity.Status;
 import com.walmart.ticketservice.entity.Venue;
 
+/**
+ * 
+ * @author sgoel201
+ * This class will setup spring boot's embeded mongo DB server on localhost	
+ *
+ */
+
 @Configuration
 public class MongoConfig {
     private static final String MONGO_DB_URL = "localhost";
-    private static final int MONGO_PORT = 12345;
+    private static final int MONGO_PORT = 12347;
     private static final String MONGO_DB_NAME = "embeded_db";
     @Bean
     public MongoTemplate mongoTemplate() throws IOException {
@@ -58,12 +65,14 @@ public class MongoConfig {
         MongoCollection<Document> venueCollection  = mongoTemplate.createCollection("venue");
         venueCollection.createIndex(Indexes.ascending("venueId"));
         venueCollection.insertOne(document);
+        System.out.println(mongoTemplate.getCollection("venue"));
 
         return mongoTemplate;
     }
 
     /*
-     * This method create a Venue object which will be inserted into mongo db
+     * This method create sample data for Venue, SeatHold, and Seat objects.
+     * Loads document into MongoDB collection.
      */
 	private Venue loadVenueDocument() {
 
