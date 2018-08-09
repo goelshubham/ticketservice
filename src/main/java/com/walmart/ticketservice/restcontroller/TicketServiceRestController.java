@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.walmart.ticketservice.entity.SeatHold;
+import com.walmart.ticketservice.exceptions.ErrorConstants;
+import com.walmart.ticketservice.exceptions.InvalidRequest;
 import com.walmart.ticketservice.repository.BookingRepository;
 import com.walmart.ticketservice.service.TicketService;
 import com.walmart.ticketservice.types.FindSeatsRequest;
@@ -19,6 +21,7 @@ import com.walmart.ticketservice.types.FindSeatsResponse;
 import com.walmart.ticketservice.types.HoldSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsResponse;
+import com.walmart.ticketservice.validator.RequestValidator;
 
 @RestController
 @RequestMapping("/ticketservive")
@@ -30,14 +33,16 @@ public class TicketServiceRestController {
 	@Autowired
 	private BookingRepository bookingRepo;
 	
+	@Autowired
+	private RequestValidator requestValidator;
+	
 	@RequestMapping(value= "/api/numSeatsAvailable", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<FindSeatsResponse> numSeatsAvailable(@RequestBody FindSeatsRequest findSeatsRequest)
 	{
 		int numOfSeats = 0;
 		if (findSeatsRequest != null) {
-			System.out.println("Venue is -> " + findSeatsRequest.getVenueId());
-			numOfSeats = ticketService.numSeatsAvailable(findSeatsRequest.getVenueId(),
-					findSeatsRequest.getLevelNumber());
+			this.requestValidator.numSeatsAvailableValidator(findSeatsRequest);
+			numOfSeats = ticketService.numSeatsAvailable(findSeatsRequest.getVenueId(), findSeatsRequest.getLevelNumber());
 		}
 
 		FindSeatsResponse findSeatsResponse = new FindSeatsResponse();
@@ -50,6 +55,8 @@ public class TicketServiceRestController {
 	{
 		SeatHold seatHoldResponse = null;
 		if (holdSeatsRequest != null) {
+			this.requestValidator.findAndHoldSeatsValidator(holdSeatsRequest);
+
 			seatHoldResponse = new SeatHold();
 			seatHoldResponse = ticketService.findAndHoldSeats(holdSeatsRequest.getNumberOfSeats(),
 					holdSeatsRequest.getVenueId(), holdSeatsRequest.getCustomerEmailId());
@@ -64,6 +71,8 @@ public class TicketServiceRestController {
 		String bookingID = null;
 		SeatHold seatHold = null;
 		if (reserveSeatsRequest != null) {
+			
+			this.requestValidator.reserverSeatsValidator(reserveSeatsRequest);
 			bookingID = this.ticketService.reserveSeats(reserveSeatsRequest.getSeatHoldId(),
 					reserveSeatsRequest.getCustomerEmail());
 		}

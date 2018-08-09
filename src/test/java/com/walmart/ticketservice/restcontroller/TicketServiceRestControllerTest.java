@@ -27,6 +27,7 @@ import com.walmart.ticketservice.types.FindSeatsResponse;
 import com.walmart.ticketservice.types.HoldSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsRequest;
 import com.walmart.ticketservice.types.ReserveSeatsResponse;
+import com.walmart.ticketservice.validator.RequestValidator;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -50,6 +51,9 @@ public class TicketServiceRestControllerTest {
 	@Mock
 	private ReserveSeatsResponse reserverSeatResponse;
 	
+	@Mock
+	private RequestValidator requestValidator;
+	
 	@Before
 	public void contextLoads() {
 	}
@@ -61,7 +65,7 @@ public class TicketServiceRestControllerTest {
 		FindSeatsRequest findSeatsRequest = new FindSeatsRequest();
 		findSeatsRequest.setVenueId("CityHall");
 		findSeatsRequest.setLevelNumber("1");
-		ticketServiceRestController.numSeatsAvailable(new FindSeatsRequest());
+		ticketServiceRestController.numSeatsAvailable(findSeatsRequest);
 		ResponseEntity<FindSeatsResponse> r = ticketServiceRestController.numSeatsAvailable(new FindSeatsRequest());
 		assertEquals(HttpStatus.OK, r.getStatusCode());
 	}

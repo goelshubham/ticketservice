@@ -46,7 +46,7 @@ public class TicketServiceImpl implements TicketService {
 
 		log.debug("Start of numSeatsAvailable method");
 
-		requestValidator.numSeatsAvailableValidator(venueId, venueLevel);
+		//requestValidator.numSeatsAvailableValidator(venueId, venueLevel);
 
 		Venue venue = this.ticketServiceUtil.getVenue(venueId);
 
@@ -66,7 +66,7 @@ public class TicketServiceImpl implements TicketService {
 	public SeatHold findAndHoldSeats(int numSeats, String venueId, String customerEmail) {
 
 		log.debug("Start of findAndHoldSeats method");
-		requestValidator.findAndHoldSeatsValidator(numSeats, venueId, customerEmail);
+		//requestValidator.findAndHoldSeatsValidator(numSeats, venueId, customerEmail);
 
 		Venue ven = this.ticketServiceUtil.getVenue(venueId);
 
@@ -119,7 +119,7 @@ public class TicketServiceImpl implements TicketService {
 	public String reserveSeats(String seatHoldId, String customerEmail) {
 
 		log.debug("Start of reserveSeats method");
-		this.requestValidator.reserverSeatsValidator(seatHoldId, customerEmail);
+		//this.requestValidator.reserverSeatsValidator(seatHoldId, customerEmail);
 
 		Optional<SeatHold> seatHold = this.bookingRepository.findById(seatHoldId);
 

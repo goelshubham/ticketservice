@@ -30,6 +30,8 @@ import com.walmart.ticketservice.exceptions.InvalidRequest;
 import com.walmart.ticketservice.repository.BookingRepository;
 import com.walmart.ticketservice.servicehandler.TicketServiceHandler;
 import com.walmart.ticketservice.servicehandler.TicketServiceHandlerTest;
+import com.walmart.ticketservice.types.ReserveSeatsRequest;
+import com.walmart.ticketservice.types.ReserverSeatResponseTest;
 import com.walmart.ticketservice.utility.TicketServiceUtil;
 import com.walmart.ticketservice.validator.RequestValidator;
 
@@ -151,8 +153,9 @@ public class TicketServiceTest {
 		SeatHold seatHold = new SeatHold();
 		seatHold.setBookingId("ABCDEGGH");
 		seatHold.setCustomerEmail("test@gmail.com");
+		ReserveSeatsRequest request = new ReserveSeatsRequest();
 		try {
-			requestValidator.reserverSeatsValidator(seatHold.getBookingId(), seatHold.getCustomerEmail());
+			requestValidator.reserverSeatsValidator(request);
 		} catch (Exception e) {
 			exceptionHappend = true;
 		}
