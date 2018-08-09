@@ -127,7 +127,7 @@ This API Commit seats held for a specific customer.
     
 <b>Sample Request</b>
 		
-      curl -H "Content-Type: application/json" -d '{"seatHoldId": "BKFJRPLWLU46", "customerEmailId": "goyalshub@gmail.com"}' -X POST http://localhost:8080/ticketservive/api/reserveSeats | json_pp 
+      curl -H "Content-Type: application/json" -d '{"seatHoldId": "BKFJRPLWLU46", "customerEmail": "goyalshub@gmail.com"}' -X POST http://localhost:8080/ticketservive/api/reserveSeats | json_pp 
 
 
 <b>Sample Response</b>
